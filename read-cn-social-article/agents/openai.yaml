@@ -1,0 +1,4 @@
+interface:
+  display_name: "Read CN Social Article"
+  short_description: "Read CN social posts and save Markdown knowledge cards."
+  default_prompt: "Use $read-cn-social-article to read this WeChat Official Account or Xiaohongshu image-text post."
