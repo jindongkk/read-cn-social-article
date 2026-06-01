@@ -1,31 +1,29 @@
 # read-cn-social-article
 
-A Codex Skill for reading and reusing Chinese social image-text posts from WeChat Official Account articles and Xiaohongshu/RedNote notes.
+一个用于读取、拆解和复用中文社交图文内容的 Codex Skill，支持公众号文章和小红书/RedNote 图文笔记。
 
-This skill turns social posts into reusable content assets: summaries, viral-content breakdowns, original rewrite templates, and Markdown knowledge cards.
+它的定位不是“把文章读完”，而是把社交内容转成可学习、可研究、可复用、可沉淀的内容资产。
 
-## Features
+## 功能
 
-- Read public WeChat Official Account articles from `mp.weixin.qq.com`.
-- Read Xiaohongshu/RedNote notes from `xiaohongshu.com`, `xhslink.com`, or screenshots when browser access is limited.
-- Normalize every source into a standard content object.
-- Analyze Xiaohongshu cover images, carousel order, visible image text, visual hooks, and OCR uncertainty.
-- Save structured Markdown knowledge cards to a `markdown/` folder.
+- 读取公开公众号文章：`mp.weixin.qq.com`
+- 读取小红书/RedNote 图文：`xiaohongshu.com`、`xhslink.com`，或在受限时使用截图/浏览器内容
+- 将不同来源统一成标准内容对象
+- 分析小红书封面图、轮播顺序、图片中文字、视觉钩子和 OCR 不确定性
+- 将内容保存为 Markdown 知识卡片，默认写入工作区的 `markdown/` 文件夹
 
-## Actions
+## 四个动作
 
-The skill supports four user-facing actions:
-
-| Action | Purpose |
+| 动作 | 用途 |
 | --- | --- |
-| 总结 | Extract core ideas, facts, structure, audience, and takeaways. |
-| 爆款拆解 | Analyze title hooks, cover hooks, opening, emotional value, share triggers, and reusable patterns. |
-| 仿写 | Extract a structure template and write original content for a new topic. |
-| 加入知识库 | Save a structured Markdown card to the workspace `markdown/` folder. |
+| 总结 | 提炼核心观点、关键信息、内容结构、目标人群和可引用点 |
+| 爆款拆解 | 拆标题钩子、封面钩子、开头、情绪价值、分享动机和可复用结构 |
+| 仿写 | 提取结构模板，为新主题生成原创内容，避免贴近原文洗稿 |
+| 加入知识库 | 生成结构化 Markdown 知识卡，保存到 `markdown/` 文件夹 |
 
-## Install
+## 安装
 
-Copy the skill folder into your Codex skills directory.
+把 `read-cn-social-article` 文件夹复制到 Codex 的 skills 目录。
 
 ### Windows
 
@@ -39,91 +37,134 @@ Copy-Item -Recurse .\read-cn-social-article "$HOME\.codex\skills\"
 cp -R ./read-cn-social-article ~/.codex/skills/
 ```
 
-Restart Codex or open a new thread, then invoke:
+然后重启 Codex，或打开一个新线程，使用：
 
 ```text
 $read-cn-social-article
 ```
 
-## Usage Examples
+## 使用示例
 
-### Summarize A WeChat Article
+### 总结公众号文章
 
 ```text
 Use $read-cn-social-article to summarize this article:
 https://mp.weixin.qq.com/s/...
 ```
 
-### Break Down A Xiaohongshu Note
+也可以直接中文表达：
 
 ```text
-Use $read-cn-social-article to do 爆款拆解 for this Xiaohongshu link:
+用 $read-cn-social-article 总结这篇公众号文章：
+https://mp.weixin.qq.com/s/...
+```
+
+### 拆解小红书笔记
+
+```text
+用 $read-cn-social-article 对这个小红书链接做爆款拆解：
 https://www.xiaohongshu.com/discovery/item/...
 ```
 
-### Save To Markdown Knowledge Base
+### 加入 Markdown 知识库
 
 ```text
-Use $read-cn-social-article to read this post and 加入知识库.
+用 $read-cn-social-article 读取这个链接，并加入知识库。
 ```
 
-By default, knowledge cards are saved to:
+默认保存位置：
 
 ```text
 markdown/
 ```
 
-## Standard Content Object
+## 标准内容对象
 
-All actions consume one normalized content object. The schema is documented in:
+这个 skill 会先把不同平台的内容统一成一个标准内容对象，然后再执行总结、爆款拆解、仿写或加入知识库。
+
+对象规范在：
 
 ```text
 read-cn-social-article/references/content-object.md
 ```
 
-Create a blank object:
+生成一个空模板：
 
 ```bash
 python read-cn-social-article/scripts/normalize_content_object.py --template
 ```
 
-Normalize an extracted article Markdown file:
+把已抽取的文章 Markdown 转成标准对象：
 
 ```bash
 python read-cn-social-article/scripts/normalize_content_object.py --from-markdown article.md --output content-object.json
 ```
 
-Save a knowledge card from a content object:
+从标准对象生成知识卡片：
 
 ```bash
 python read-cn-social-article/scripts/save_knowledge_card.py --kb-dir markdown --content-object content-object.json
 ```
 
-## WeChat Article Extraction
+## 公众号文章抽取
 
-For public WeChat articles:
+公开公众号文章可以直接转成 Markdown：
 
 ```bash
 python read-cn-social-article/scripts/wechat_article_to_markdown.py "https://mp.weixin.qq.com/s/..." --output article.md --download-images
 ```
 
-If direct HTTP extraction is blocked, open the article in a browser, save the rendered HTML, then run:
+如果微信阻止直接 HTTP 访问，可以先在浏览器打开文章，保存渲染后的 HTML，再运行：
 
 ```bash
 python read-cn-social-article/scripts/wechat_article_to_markdown.py saved.html --output article.md --download-images
 ```
 
-## Xiaohongshu Image Understanding
+## 小红书图片理解
 
-Xiaohongshu posts often place key information inside images. The skill treats images as first-class content units:
+小红书图文经常把关键信息放在图片里，所以这个 skill 会把图片当成一等内容单元处理。
 
-- `visible_text`: text visible inside the image.
-- `visual_summary`: what the image shows.
-- `content_role`: cover hook, evidence, example, tutorial step, quote card, product display, atmosphere, or CTA.
-- `hook_analysis`: why the image may stop scrolling.
-- `confidence` and `uncertainty`: OCR and visual-reading caveats.
+每张图片会尽量记录：
 
-## Repository Structure
+- `visible_text`：图片里可见的文字
+- `visual_summary`：图片展示了什么
+- `content_role`：封面钩子、证据、案例、教程步骤、金句卡、产品展示、氛围图或 CTA
+- `hook_analysis`：为什么这张图可能让用户停下来
+- `confidence` 和 `uncertainty`：OCR 或视觉理解的不确定性
+
+## 知识卡片格式
+
+加入知识库时，会生成类似这样的 Markdown：
+
+```markdown
+---
+title: "标题"
+platform: "xiaohongshu"
+source_url: "https://..."
+author: "作者"
+published: "2026-06-02"
+extracted_at: "2026-06-02 12:00:00"
+action: "加入知识库"
+confidence: "high"
+tags:
+  - "亲密关系"
+  - "爆款拆解"
+---
+
+# 标题
+
+## Source Snapshot
+
+## Core Ideas
+
+## Image Understanding
+
+## Reusable Patterns
+
+## Notes
+```
+
+## 目录结构
 
 ```text
 read-cn-social-article/
@@ -139,8 +180,9 @@ read-cn-social-article/
     wechat_article_to_markdown.py
 ```
 
-## Notes
+## 注意事项
 
-- The scripts use Python standard library only.
-- Respect platform access controls. Do not bypass paywalls, private posts, CAPTCHAs, account restrictions, or login walls.
-- Xiaohongshu extraction may require a browser session, screenshots, or user-provided exports when public HTML is incomplete.
+- 脚本只使用 Python 标准库，不需要额外安装第三方包。
+- 请尊重平台访问控制，不要绕过付费墙、私密内容、验证码、登录墙或账号限制。
+- 小红书内容如果公开 HTML 不完整，可能需要浏览器会话、截图、复制文本或用户提供的导出内容。
+- `仿写` 应复用结构和策略，不应贴近原文表达或变相洗稿。
